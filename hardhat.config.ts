@@ -6,9 +6,6 @@ import "hardhat-deploy";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/.env" });
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
-
 const config: HardhatUserConfig = {
   solidity: "0.8.19",
   typechain: {
@@ -25,16 +22,7 @@ const config: HardhatUserConfig = {
       forking: {
         url: "https://bsc-dataseed.binance.org/",
       },
-    },
-    bsc: {
       chainId: 56,
-      url: "https://bsc-dataseed.binance.org/",
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-  },
-  verify: {
-    etherscan: {
-      apiKey: ETHERSCAN_KEY || "",
     },
   },
 };

@@ -1,45 +1,9 @@
 import { CallWithSyncFeeERC2771Request } from "@gelatonetwork/relay-sdk";
-import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { BUSD_TOKEN, KMON_TOKEN, KMON_SAFE } from "../src/constants";
+import { callWithSyncFeeERC2771 } from "../src/__mock__/relay-sdk";
 import { deployments, ethers } from "hardhat";
 import { Counter, IERC20 } from "../typechain";
 import { expect } from "chai";
-
-import {
-  BUSD_TOKEN,
-  FEE_COLLECTOR,
-  GELATO_RELAY_ERC2771,
-  KMON_TOKEN,
-  KMON_SAFE,
-} from "../shared/constants";
-
-// emulates behaviour locally
-// https://github.com/gelatodigital/rel-example-unit-tests
-const callWithSyncFeeERC2771 = async (
-  request: CallWithSyncFeeERC2771Request
-) => {
-  const fee = ethers.utils.parseEther("1");
-
-  const data = ethers.utils.solidityPack(
-    ["bytes", "address", "address", "uint256", "address"],
-    [request.data, FEE_COLLECTOR, request.feeToken, fee, request.user]
-  );
-
-  const feeToken = (await ethers.getContractAt(
-    "IERC20",
-    request.feeToken
-  )) as IERC20;
-
-  const gelato = await ethers.getImpersonatedSigner(GELATO_RELAY_ERC2771);
-
-  await setBalance(gelato.address, ethers.utils.parseEther("1"));
-
-  const balanceBefore = await feeToken.balanceOf(FEE_COLLECTOR);
-  await gelato.sendTransaction({ to: request.target, data });
-  const balanceAfter = await feeToken.balanceOf(FEE_COLLECTOR);
-
-  if (balanceAfter.toBigInt() - balanceBefore.toBigInt() < fee.toBigInt())
-    throw new Error("Insufficient relay fee");
-};
 
 describe("Counter", () => {
   let counter: Counter;
@@ -78,7 +42,7 @@ describe("Counter", () => {
     const request: CallWithSyncFeeERC2771Request = {
       target: counter.address,
       user: deployer.address,
-      data: data!,
+      data: data,
       feeToken: BUSD_TOKEN,
       chainId: 56, // BSC
       isRelayContext: true,
