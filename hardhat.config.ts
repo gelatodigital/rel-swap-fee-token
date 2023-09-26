@@ -20,7 +20,8 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://bsc-dataseed.binance.org/",
+        url: "https://binance.llamarpc.com",
+        blockNumber: 29025100,
       },
       chainId: 56,
     },
