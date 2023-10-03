@@ -16,23 +16,26 @@ describe("Counter", () => {
     counter = (await ethers.getContractAt(
       "Counter",
       counterAddress
-    )) as Counter;
+    )) as unknown as Counter;
   });
 
   it("increment", async () => {
     const [deployer] = await ethers.getSigners();
 
-    const maxFee = ethers.utils.parseEther("1000");
-    const kmon = (await ethers.getContractAt("IERC20", KMON_TOKEN)) as IERC20;
+    const maxFee = ethers.parseEther("1000");
+    const kmon = (await ethers.getContractAt(
+      "IERC20",
+      KMON_TOKEN
+    )) as unknown as IERC20;
 
     // transfer from safe to deployer
     const kmonSafe = await ethers.getImpersonatedSigner(KMON_SAFE);
     await kmon.connect(kmonSafe).transfer(deployer.address, maxFee);
 
     // deployer approve counter to spend fee
-    await kmon.connect(deployer).approve(counter.address, maxFee);
+    await kmon.connect(deployer).approve(counter.getAddress(), maxFee);
 
-    const { data } = await counter.populateTransaction.increment(
+    const { data } = await counter.increment.populateTransaction(
       maxFee,
       Math.floor(Date.now() / 1000) + 60
     );
@@ -40,7 +43,7 @@ describe("Counter", () => {
     if (!data) throw new Error("Invalid transaction");
 
     const request: CallWithSyncFeeERC2771Request = {
-      target: counter.address,
+      target: await counter.getAddress(),
       user: deployer.address,
       data: data,
       feeToken: BUSD_TOKEN,
@@ -52,6 +55,6 @@ describe("Counter", () => {
     await callWithSyncFeeERC2771(request);
     const counterAfter = await counter.counter(deployer.address);
 
-    expect(counterAfter.toBigInt() - counterBefore.toBigInt()).to.equal(1n);
+    expect(BigInt(counterAfter) - BigInt(counterBefore)).to.equal(1n);
   });
 });
