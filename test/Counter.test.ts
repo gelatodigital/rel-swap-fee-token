@@ -33,7 +33,7 @@ describe("Counter", () => {
     await kmon.connect(kmonSafe).transfer(deployer.address, maxFee);
 
     // deployer approve counter to spend fee
-    await kmon.connect(deployer).approve(counter.getAddress(), maxFee);
+    await kmon.connect(deployer).approve(counter.target, maxFee);
 
     const { data } = await counter.increment.populateTransaction(
       maxFee,
@@ -43,7 +43,7 @@ describe("Counter", () => {
     if (!data) throw new Error("Invalid transaction");
 
     const request: CallWithSyncFeeERC2771Request = {
-      target: await counter.getAddress(),
+      target: counter.target as string,
       user: deployer.address,
       data: data,
       feeToken: BUSD_TOKEN,

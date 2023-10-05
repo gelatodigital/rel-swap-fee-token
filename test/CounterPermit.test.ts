@@ -43,7 +43,7 @@ describe("CounterPermit", () => {
       deployer,
       play as unknown as Contract,
       BigInt(maxFee),
-      await counter.getAddress(),
+      counter.target as string,
       deadline,
       56 // BSC
     );
@@ -64,7 +64,7 @@ describe("CounterPermit", () => {
     if (!data) throw new Error("Invalid transaction");
 
     const request: CallWithSyncFeeRequest = {
-      target: await counter.getAddress(),
+      target: counter.target as string,
       data: data,
       feeToken: BUSD_TOKEN,
       chainId: 56, // BSC
