@@ -13,7 +13,7 @@ export const signPermit = async (
     name: await token.name(),
     version: "1",
     chainId: chainId,
-    verifyingContract: token.address,
+    verifyingContract: await token.getAddress(),
   };
 
   const types = {
@@ -35,8 +35,8 @@ export const signPermit = async (
   };
 
   try {
-    const sig = await signer._signTypedData(domain, types, data);
-    return ethers.utils.splitSignature(sig);
+    const sig = await signer.signTypedData(domain, types, data);
+    return ethers.Signature.from(sig);
   } catch (e) {
     return null;
   }

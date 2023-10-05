@@ -10,7 +10,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.19",
   typechain: {
     outDir: "typechain",
-    target: "ethers-v5",
+    target: "ethers-v6",
   },
   namedAccounts: {
     deployer: {
@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://binance.llamarpc.com",
+        url: "https://rpc.ankr.com/bsc",
         blockNumber: 29025100,
       },
       chainId: 56,

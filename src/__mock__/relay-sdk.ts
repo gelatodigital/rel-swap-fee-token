@@ -21,9 +21,9 @@ import {
 export const callWithSyncFeeERC2771 = async (
   request: CallWithSyncFeeERC2771Request
 ) => {
-  const fee = ethers.utils.parseEther("1");
+  const fee = ethers.parseEther("1");
 
-  const data = ethers.utils.solidityPack(
+  const data = ethers.solidityPacked(
     ["bytes", "address", "address", "uint256", "address"],
     [request.data, FEE_COLLECTOR, request.feeToken, fee, request.user]
   );
@@ -32,15 +32,15 @@ export const callWithSyncFeeERC2771 = async (
     GELATO_RELAY_ERC2771,
     request.target,
     data,
-    fee.toBigInt(),
+    BigInt(fee),
     request.feeToken
   );
 };
 
 export const callWithSyncFee = async (request: CallWithSyncFeeRequest) => {
-  const fee = ethers.utils.parseEther("1");
+  const fee = ethers.parseEther("1");
 
-  const data = ethers.utils.solidityPack(
+  const data = ethers.solidityPacked(
     ["bytes", "address", "address", "uint256"],
     [request.data, FEE_COLLECTOR, request.feeToken, fee]
   );
@@ -49,7 +49,7 @@ export const callWithSyncFee = async (request: CallWithSyncFeeRequest) => {
     GELATO_RELAY,
     request.target,
     data,
-    fee.toBigInt(),
+    BigInt(fee),
     request.feeToken
   );
 };
@@ -61,16 +61,19 @@ const internalCallWithSyncFee = async (
   fee: bigint,
   feeToken: string
 ) => {
-  const token = (await ethers.getContractAt("IERC20", feeToken)) as IERC20;
+  const token = (await ethers.getContractAt(
+    "IERC20",
+    feeToken
+  )) as unknown as IERC20;
 
   const gelato = await ethers.getImpersonatedSigner(from);
 
-  await setBalance(gelato.address, ethers.utils.parseEther("1"));
+  await setBalance(gelato.address, ethers.parseEther("1"));
 
   const balanceBefore = await token.balanceOf(FEE_COLLECTOR);
   await gelato.sendTransaction({ to, data });
   const balanceAfter = await token.balanceOf(FEE_COLLECTOR);
 
-  if (balanceAfter.toBigInt() - balanceBefore.toBigInt() < fee)
+  if (BigInt(balanceAfter) - BigInt(balanceBefore) < fee)
     throw new Error("Insufficient relay fee");
 };

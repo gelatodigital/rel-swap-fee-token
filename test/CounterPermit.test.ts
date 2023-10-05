@@ -6,6 +6,7 @@ import { deployments, ethers } from "hardhat";
 import { CounterPermit, ERC20Permit } from "../typechain";
 import { signPermit } from "../src/signature";
 import { expect } from "chai";
+import { Contract } from "ethers";
 
 describe("CounterPermit", () => {
   let counter: CounterPermit;
@@ -18,20 +19,20 @@ describe("CounterPermit", () => {
     counter = (await ethers.getContractAt(
       "CounterPermit",
       counterAddress
-    )) as CounterPermit;
+    )) as unknown as CounterPermit;
   });
 
   it("increment", async () => {
     const [deployer] = await ethers.getSigners();
 
-    const maxFee = ethers.utils.parseEther("30");
+    const maxFee = ethers.parseEther("30");
     const play = (await ethers.getContractAt(
       "ERC20Permit",
       PLAY_TOKEN
-    )) as ERC20Permit;
+    )) as unknown as ERC20Permit;
 
     // transfer from safe to deployer
-    await setBalance(PLAY_SAFE, ethers.utils.parseEther("1"));
+    await setBalance(PLAY_SAFE, ethers.parseEther("1"));
     const playSafe = await ethers.getImpersonatedSigner(PLAY_SAFE);
     await play.connect(playSafe).transfer(deployer.address, maxFee);
 
@@ -40,9 +41,9 @@ describe("CounterPermit", () => {
 
     const sig = await signPermit(
       deployer,
-      play,
-      maxFee.toBigInt(),
-      counter.address,
+      play as unknown as Contract,
+      BigInt(maxFee),
+      counter.target as string,
       deadline,
       56 // BSC
     );
@@ -51,7 +52,7 @@ describe("CounterPermit", () => {
 
     const { v, r, s } = sig;
 
-    const { data } = await counter.populateTransaction.increment(
+    const { data } = await counter.increment.populateTransaction(
       deployer.address,
       maxFee,
       deadline,
@@ -63,7 +64,7 @@ describe("CounterPermit", () => {
     if (!data) throw new Error("Invalid transaction");
 
     const request: CallWithSyncFeeRequest = {
-      target: counter.address,
+      target: counter.target as string,
       data: data,
       feeToken: BUSD_TOKEN,
       chainId: 56, // BSC
@@ -74,6 +75,6 @@ describe("CounterPermit", () => {
     await callWithSyncFee(request);
     const counterAfter = await counter.counter(deployer.address);
 
-    expect(counterAfter.toBigInt() - counterBefore.toBigInt()).to.equal(1n);
+    expect(BigInt(counterAfter) - BigInt(counterBefore)).to.equal(1n);
   });
 });
