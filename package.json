@@ -55,6 +55,5 @@
   "lint-staged": {
     "*.*{js,json,md,ts,sol,yml,yaml}": "prettier --write",
     "*.*{ts,js}": "eslint -c .eslintrc.json"
-  },
-  "dependencies": {}
+  }
 }
