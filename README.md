@@ -3,7 +3,7 @@
 This project demonstrates synchronous fee payment (``callWithSyncFee``/``callWithSyncFeeERC2771``) using an unsupported fee token.
 Rather than using ``_transferRelayFee``, it introduces [``_swapAndTransferRelayFee``](https://github.com/gelatodigital/rel-swap-fee-token/blob/main/contracts/Counter.sol#L42-L72) which swaps the unsupported token to a supported fee token using any Uniswap-based router and transfers it to the fee collector.
 
-> **Note**  
+> [!NOTE]
 > Query the API for a list of supported tokens.  
 > https://api.gelato.digital/oracles/{chainId}/paymentTokens
 
@@ -17,7 +17,7 @@ This can be done in one of two ways:
 Both are demonstrated in [``Counter``](https://github.com/gelatodigital/rel-swap-fee-token/blob/main/contracts/Counter.sol) and [``CounterPermit``](https://github.com/gelatodigital/rel-swap-fee-token/blob/main/contracts/CounterPermit.sol) respectively.
 The latter is preferred when dealing with ``ERC20Permit`` compatible tokens since spending can be permitted off-chain without requiring an additional transaction.
 
-> **Note**  
+> [!NOTE]
 > When using off-chain permit, ``callWithSyncFee`` is used rather than ``callWithSyncFeeERC2771``. This is because authentication is already handled by the permit signature.
 > Refer to the [documentation](https://docs.gelato.network/developer-services/relay) for a more detailed comparison between the two.
 
